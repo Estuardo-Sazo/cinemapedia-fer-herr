@@ -1,41 +1,35 @@
 import 'movie_moviedb.dart';
 
-/* MovieDbResponse movieDbResponseFromJson(String str) =>
-    MovieDbResponse.fromJson(json.decode(str));
-
-String movieDbResponseToJson(MovieDbResponse data) =>
-    json.encode(data.toJson()); */
-
 class MovieDbResponse {
   final Dates? dates;
   final int page;
-  final List<MOvieMovieDB> MOvieMovieDBs;
+  final List<MovieMovieDB> results;
   final int totalPages;
   final int totalMOvieMovieDBs;
 
   MovieDbResponse({
     required this.dates,
     required this.page,
-    required this.MOvieMovieDBs,
+    required this.results,
     required this.totalPages,
     required this.totalMOvieMovieDBs,
   });
 
   factory MovieDbResponse.fromJson(Map<String, dynamic> json) =>
       MovieDbResponse(
-        dates: json["dates"] ? Dates.fromJson(json["dates"]) : null,
+        dates: json["dates"] != null ? Dates.fromJson(json["dates"]) : null,
         page: json["page"],
-        MOvieMovieDBs: List<MOvieMovieDB>.from(
-            json["MOvieMovieDBs"].map((x) => MOvieMovieDB.fromJson(x))),
+        results: List<MovieMovieDB>.from(
+            json["results"].map((x) => MovieMovieDB.fromJson(x))),
         totalPages: json["total_pages"],
-        totalMOvieMovieDBs: json["total_MOvieMovieDBs"],
+        totalMOvieMovieDBs: json["total_results"],
       );
 
   Map<String, dynamic> toJson() => {
         "dates": dates == null ? null : dates!.toJson(),
         "page": page,
-        "MOvieMovieDBs":
-            List<dynamic>.from(MOvieMovieDBs.map((x) => x.toJson())),
+        "MovieMovieDBs":
+            List<dynamic>.from(results.map((x) => x.toJson())),
         "total_pages": totalPages,
         "total_MOvieMovieDBs": totalMOvieMovieDBs,
       };
