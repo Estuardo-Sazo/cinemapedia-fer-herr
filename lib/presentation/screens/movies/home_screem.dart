@@ -10,9 +10,9 @@ class HomeScreem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: _HomeView(),
-    ));
+      body: _HomeView(),
+      bottomNavigationBar: CustomBottomNavigation(),
+    );
   }
 }
 
@@ -33,10 +33,7 @@ class _HomeViewState extends ConsumerState<_HomeView> {
     //final nowPlayingMovies = ref.watch(nowPlayinMoviesProvider);
     final slideShowMovies = ref.watch(mociesSlideshowProvider);
     return Column(
-      children: [
-        CustomAppbar(),
-        MoviesSlideshow(movies: slideShowMovies)
-      ],
+      children: [CustomAppbar(), MoviesSlideshow(movies: slideShowMovies)],
     );
   }
 }
