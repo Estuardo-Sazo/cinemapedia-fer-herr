@@ -11,7 +11,7 @@ class HomeScreem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _HomeView(),
-      bottomNavigationBar: CustomBottomNavigation(),
+      bottomNavigationBar: const CustomBottomNavigation(),
     );
   }
 }
@@ -32,18 +32,47 @@ class _HomeViewState extends ConsumerState<_HomeView> {
   Widget build(BuildContext context) {
     final nowPlayingMovies = ref.watch(nowPlayinMoviesProvider);
     final slideShowMovies = ref.watch(mociesSlideshowProvider);
-    return Column(
-      children: [
-        const CustomAppbar(),
-        MoviesSlideshow(movies: slideShowMovies),
-        MovieHorizotalListview(
-          movies: nowPlayingMovies,
-          title: 'En Cines',
-          subTitle: 'Lunes 20',
-          loadNextPage: () =>
-              ref.read(nowPlayinMoviesProvider.notifier).loadNextPage(),
-        )
-      ],
-    );
+    return CustomScrollView(slivers: [
+      const SliverAppBar(
+        floating: true,
+        flexibleSpace: FlexibleSpaceBar(
+          title: CustomAppbar(),
+          titlePadding: EdgeInsets.all(0),
+        ),
+      ),
+
+
+      SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+        return Column(
+          children: [
+            // const CustomAppbar(),
+            MoviesSlideshow(movies: slideShowMovies),
+            MovieHorizotalListview(
+              movies: nowPlayingMovies,
+              title: 'En Cines',
+              subTitle: 'Lunes 20',
+              loadNextPage: () =>
+                  ref.read(nowPlayinMoviesProvider.notifier).loadNextPage(),
+            ),
+            MovieHorizotalListview(
+              movies: nowPlayingMovies,
+              title: 'Proximamente',
+              subTitle: 'Este mes',
+              loadNextPage: () =>
+                  ref.read(nowPlayinMoviesProvider.notifier).loadNextPage(),
+            ),
+            MovieHorizotalListview(
+              movies: nowPlayingMovies,
+              title: 'Terror',
+              subTitle: 'Este mes',
+              loadNextPage: () =>
+                  ref.read(nowPlayinMoviesProvider.notifier).loadNextPage(),
+            ),
+            SizedBox(height: 10),
+          ],
+        );
+      }, childCount: 1))
+    ]);
   }
 }
