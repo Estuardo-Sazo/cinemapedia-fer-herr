@@ -1,4 +1,5 @@
 import 'package:cinemapedia/infrastructure/mappers/movie_mapper.dart';
+import 'package:cinemapedia/infrastructure/models/moviedb/movie_details.dart';
 import 'package:cinemapedia/infrastructure/models/moviedb/moviedb_response.dart';
 import 'package:dio/dio.dart';
 import 'package:cinemapedia/config/constants/environment.dart';
@@ -64,8 +65,9 @@ class MoviedbDatasource extends MoviesDatasource {
       throw Exception('Movie with id: $id not found');
     }
 
-    final Movie movie = MovieMaper;
+    final movieDetails = MovieDetails.fromJson(response.data);
+    final Movie movie = MovieMapper.movieDetailsToEntity(movieDetails);
 
-    throw UnimplementedError();
+    return movie;
   }
 }
