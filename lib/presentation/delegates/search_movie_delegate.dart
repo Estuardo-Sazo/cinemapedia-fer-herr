@@ -60,38 +60,59 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
           final movies = snapshot.data!;
           return ListView.builder(
             itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final movie = movies[index];
-              return ListTile(
-                onTap: () {
-                  close(context, movie);
-                },
-                leading: FadeInLeft(
-                  child: Hero(
-                    tag: movie.id,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: FadeInImage(
-                        placeholder: const AssetImage('assets/no-image.jpg'),
-                        image: NetworkImage(movie.posterPath),
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-                title: FadeInRight(
-                  child: Text(movie.title),
-                ),
-              );
-            },
+            itemBuilder: (context, index) => _MovieItem(movie: movies[index]),
           );
         }
         return const Center(
           child: CircularProgressIndicator(),
         );
       },
+    );
+  }
+}
+
+class _MovieItem extends StatelessWidget {
+  final Movie movie;
+  const _MovieItem({required this.movie});
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        children: [
+          //Image
+          FadeInLeft(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                movie.posterPath,
+                width: size.width * 0.2,
+                height: size.height * 0.1,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(movie.title, style: textStyle.titleMedium),
+                (movie.overview.length > 100)
+                    ? Text('${movie.overview.substring(0, 100)}...',
+                        style: textStyle.bodySmall)
+                    : Text(movie.overview, style: textStyle.bodySmall),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
