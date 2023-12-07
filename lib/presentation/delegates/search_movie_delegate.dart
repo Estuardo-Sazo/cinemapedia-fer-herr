@@ -61,7 +61,8 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
           final movies = snapshot.data!;
           return ListView.builder(
             itemCount: movies.length,
-            itemBuilder: (context, index) => _MovieItem(movie: movies[index]),
+            itemBuilder: (context, index) =>
+                _MovieItem(movie: movies[index], onMiveSelected: close),
           );
         }
         return const Center(
@@ -74,54 +75,64 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
 
 class _MovieItem extends StatelessWidget {
   final Movie movie;
-  const _MovieItem({required this.movie});
+  final Function onMiveSelected;
+  const _MovieItem({
+    required this.movie,
+    required this.onMiveSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme;
     final size = MediaQuery.of(context).size;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Row(
-        children: [
-          //Image
-          FadeInLeft(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                movie.posterPath,
-                width: size.width * 0.2,
-                height: size.height * 0.1,
-                fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        onMiveSelected(context, movie);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Row(
+          children: [
+            //Image
+            FadeInLeft(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  movie.posterPath,
+                  width: size.width * 0.2,
+                  height: size.height * 0.1,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(movie.title, style: textStyle.titleMedium),
-                (movie.overview.length > 100)
-                    ? Text('${movie.overview.substring(0, 100)}...',
-                        style: textStyle.bodySmall)
-                    : Text(movie.overview, style: textStyle.bodySmall),
-                Row(children: [
-                  Icon(Icons.star_half_rounded, color: Colors.yellow.shade800),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  Text(HumanFormats.number(movie.voteAverage, 1),
-                      style: textStyle.bodyMedium!
-                          .copyWith(color: Colors.yellow.shade900))
-                ]),
-              ],
+            const SizedBox(
+              width: 10,
             ),
-          )
-        ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(movie.title, style: textStyle.titleMedium),
+                  (movie.overview.length > 100)
+                      ? Text('${movie.overview.substring(0, 100)}...',
+                          style: textStyle.bodySmall)
+                      : Text(movie.overview, style: textStyle.bodySmall),
+                  Row(children: [
+                    Icon(Icons.star_half_rounded,
+                        color: Colors.yellow.shade800),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Text(HumanFormats.number(movie.voteAverage, 1),
+                        style: textStyle.bodyMedium!
+                            .copyWith(color: Colors.yellow.shade900))
+                  ]),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
