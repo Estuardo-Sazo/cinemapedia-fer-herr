@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cinemapedia/config/helpers/human_formats.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
@@ -8,9 +10,32 @@ typedef SearchMoviesCallback = Future<List<Movie>> Function(String query);
 class SearchMovieDelegate extends SearchDelegate<Movie?> {
   final SearchMoviesCallback searchMovie;
 
+  StreamController<List<Movie>> debouncedMovies = StreamController.broadcast();
+  Timer? _debounceTimer;
+
   SearchMovieDelegate({
     required this.searchMovie,
   });
+
+  void closeStreams() {
+    debouncedMovies.close();
+    _debounceTimer?.cancel();
+  }
+
+  void _onQueryChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer?.cancel();
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      if (query.isEmpty) {
+        debouncedMovies.add([]);
+        return;
+      }
+      final movies = await searchMovie(query);
+      debouncedMovies.add(movies);
+    });
+  }
 
   @override
   String get searchFieldLabel => 'Buscar pelicula';
@@ -32,7 +57,10 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      onPressed: () => close(context, null),
+      onPressed: () {
+        closeStreams();
+        close(context, null);
+      },
       icon: const Icon(Icons.arrow_back),
     );
   }
@@ -49,8 +77,11 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
         child: Text('Busca una pelicula'),
       );
     }
-    return FutureBuilder<List<Movie>>(
-      future: searchMovie(query),
+
+    _onQueryChanged(query);
+    return StreamBuilder(
+      //future: searchMovie(query),
+      stream: debouncedMovies.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -61,8 +92,13 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
           final movies = snapshot.data!;
           return ListView.builder(
             itemCount: movies.length,
-            itemBuilder: (context, index) =>
-                _MovieItem(movie: movies[index], onMiveSelected: close),
+            itemBuilder: (context, index) => _MovieItem(
+              movie: movies[index],
+              onMiveSelected: (context,movie){
+                closeStreams();
+                close(context, movie);
+              },
+            ),
           );
         }
         return const Center(
