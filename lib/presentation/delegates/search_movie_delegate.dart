@@ -9,7 +9,7 @@ typedef SearchMoviesCallback = Future<List<Movie>> Function(String query);
 
 class SearchMovieDelegate extends SearchDelegate<Movie?> {
   final SearchMoviesCallback searchMovie;
-  final List<Movie> initialMovies ;
+  List<Movie> initialMovies;
 
   StreamController<List<Movie>> debouncedMovies = StreamController.broadcast();
   Timer? _debounceTimer;
@@ -35,8 +35,40 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
         return;
       } */
       final movies = await searchMovie(query);
+      initialMovies = movies;
       debouncedMovies.add(movies);
     });
+  }
+
+  Widget buildResultsAndSiggestions(BuildContext context) {
+    return StreamBuilder(
+      //future: searchMovie(query),
+      initialData: initialMovies,
+      stream: debouncedMovies.stream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Error al buscar'),
+          );
+        }
+        if (snapshot.hasData) {
+          final movies = snapshot.data ?? [];
+          return ListView.builder(
+            itemCount: movies.length,
+            itemBuilder: (context, index) => _MovieItem(
+              movie: movies[index],
+              onMiveSelected: (context, movie) {
+                closeStreams();
+                close(context, movie);
+              },
+            ),
+          );
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
   }
 
   @override
@@ -69,7 +101,7 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return const Text('Buils Results');
+    return buildResultsAndSiggestions(context);
   }
 
   @override
@@ -81,34 +113,7 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
     }
 
     _onQueryChanged(query);
-    return StreamBuilder(
-      //future: searchMovie(query),
-      initialData: initialMovies,
-      stream: debouncedMovies.stream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('Error al buscar'),
-          );
-        }
-        if (snapshot.hasData) {
-          final movies = snapshot.data ?? [];
-          return ListView.builder(
-            itemCount: movies.length,
-            itemBuilder: (context, index) => _MovieItem(
-              movie: movies[index],
-              onMiveSelected: (context,movie){
-                closeStreams();
-                close(context, movie);
-              },
-            ),
-          );
-        }
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    return buildResultsAndSiggestions(context);
   }
 }
 
